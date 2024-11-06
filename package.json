@@ -1,0 +1,19 @@
+{
+  "name": "pokepumplocal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.1",
+    "mongoose": "^8.8.0",
+    "nanoid": "^5.0.8",
+    "node-cron": "^3.0.3",
+    "uuid": "^11.0.2"
+  }
+}
