@@ -14,7 +14,7 @@ const pokeSchema = new mongoose.Schema({
   },
   pokeType: {
     type: String,
-    enum: ['Just Poke', 'Join Me', 'Trash Talk'], // 3가지 predefined 메시지 타입
+    enum: ['Just Poke', 'Join Me', 'Trash Talk', 'Shame Post'], // 4가지 predefined 메시지 타입
     required: true,
   },
   timestamp: {

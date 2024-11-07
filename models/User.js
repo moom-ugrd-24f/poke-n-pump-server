@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     isEnabled: {
       type: Boolean,
       default: false,
+      required: true,
     },
     noGymStreakLimit: {
       type: Number,
@@ -33,7 +34,8 @@ const userSchema = new mongoose.Schema({
   workoutPlan: {
     daysOfWeek: {
       type: [Number], 
-      default: [], 
+      default: [],
+      required: true, 
     },
   },
   todayAttendance: {

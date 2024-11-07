@@ -12,8 +12,8 @@ router.post('/send', async (req, res) => {
     const receiver = await User.findOne({ inviteCode: receiverInviteCode });
     if (!receiver) return res.status(404).json({ message: 'Receiver not found' });
 
-    const existingRequest = await FriendRequest.findOne({ senderId, receiverId: receiver._id });
-    if (existingRequest) return res.status(400).json({ message: 'Request already exists' });
+    //const existingRequest = await FriendRequest.findOne({ senderId, receiverId: receiver._id });
+    //if (existingRequest) return res.status(400).json({ message: 'Request already exists' });
 
     const friendRequest = new FriendRequest({ senderId, receiverId: receiver._id });
     await friendRequest.save();
@@ -29,9 +29,9 @@ router.post('/accept', async (req, res) => {
     const { requestId } = req.body;
 
     const friendRequest = await FriendRequest.findById(requestId);
-    if (!friendRequest || friendRequest.status !== 'pending') {
-      return res.status(404).json({ message: 'Friend request not found or already accepted' });
-    }
+    //if (!friendRequest || friendRequest.status !== 'pending') {
+    //  return res.status(404).json({ message: 'Friend request not found or already accepted' });
+    //}
 
     friendRequest.status = 'accepted';
     await friendRequest.save();

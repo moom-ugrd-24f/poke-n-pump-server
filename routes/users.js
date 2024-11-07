@@ -91,12 +91,12 @@ router.get('/:id/friends', async (req, res) => {
 // 친구 삭제
 router.post('/:userId/remove-friend', async (req, res) => {
   try {
-    const { friendUserId } = req.body;
+    const { friendId } = req.body;
+    const user = await User.findById(req.params.userId);
+    const friend = await User.findById(friendId);
 
-    const user = await User.findById(req.params.inviteCode);
-    const friend = await User.findById(friendUserId);
-
-    if (!user || !friend) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!friend) return res.status(404).json({ message: 'Friend not found' });
 
     // user의 친구 목록에서 friend 제거
     user.friends = user.friends.filter(id => !id.equals(friend._id));
@@ -107,7 +107,7 @@ router.post('/:userId/remove-friend', async (req, res) => {
     await friend.save();
 
     res.status(200).json({ message: 'Friend removed successfully' });
-  } catch (error) {
+  } catch (error) {    
     res.status(500).json({ message: 'Error removing friend', error });
   }
 });
