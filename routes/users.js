@@ -1,11 +1,25 @@
 // routes/users.js
 const express = require('express');
+const multer = require('multer');
 const User = require('../models/User');
 const generateInviteCode = require('../utils/generateInviteCode');
 const router = express.Router();
 
+// Configure Multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Ensure this directory exists
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
 // 사용자 생성
-router.post('/', async (req, res) => {
+router.post('/', upload.single('profilePicture'), async (req, res) => {
   try {
     const { nickname, workoutPlan, shamePostSettings } = req.body;
 
@@ -15,8 +29,9 @@ router.post('/', async (req, res) => {
     const newUser = new User({
       nickname,
       inviteCode,
-      workoutPlan,
-      shamePostSettings,
+      workoutPlan: JSON.parse(workoutPlan),
+      shamePostSettings: JSON.parse(shamePostSettings),
+      profilePicture: req.file ? req.file.path : 'uploads/default-profile.jpg' // Set default if no file
     });
 
     await newUser.save();

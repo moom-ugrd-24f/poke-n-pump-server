@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: 'default-profile.jpg', // 프로필 사진 기본값 설정
+    default: 'uploads/default-profile.jpg', // 프로필 사진 기본값 설정
   },
   shamePostSettings: {
     isEnabled: {
