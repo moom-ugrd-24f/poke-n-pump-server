@@ -157,8 +157,8 @@ router.get('/:userId/poke-list', async (req, res) => {
       .map(friend => ({ nickname: friend.nickname })); // nickname만 포함
     
     // nickname만 포함하도록 최종 변환
-    const formattedPokeList = pokeList.map(friend => ({ nickname: friend.nickname }));
-    const formattedShamePostUsers = shamePostUsers.map(friend => ({ nickname: friend.nickname }));
+    const formattedPokeList = pokeList.map(friend => ({ id: friend._id, nickname: friend.nickname }));
+    const formattedShamePostUsers = shamePostUsers.map(friend => ({ id: friend._id, nickname: friend.nickname }));
 
     res.status(200).json({
       pokeList: formattedPokeList,
