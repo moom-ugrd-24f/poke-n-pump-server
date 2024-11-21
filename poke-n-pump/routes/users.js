@@ -21,7 +21,7 @@ const upload = multer({ storage: storage });
 // 사용자 생성
 router.post('/', upload.single('profilePicture'), async (req, res) => {
   try {
-    const { nickname, workoutPlan, shamePostSettings } = req.body;
+    const { nickname, workoutPlan, shamePostSettings, expoPushToken } = req.body;
 
     // 고유한 inviteCode 생성
     const inviteCode = await generateInviteCode();
@@ -29,6 +29,7 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
     const newUser = new User({
       nickname,
       inviteCode,
+      expoPushToken,
       workoutPlan: JSON.parse(workoutPlan),
       shamePostSettings: JSON.parse(shamePostSettings),
       profilePicture: req.file ? req.file.path : 'uploads/default-profile.jpg' // Set default if no file
@@ -180,8 +181,16 @@ router.get('/:userId/poke-list', async (req, res) => {
       .slice(0, 10); // 최대 10명만 표시
     
     // nickname만 포함하도록 최종 변환
-    const formattedPokeList = pokeList.map(friend => ({ id: friend._id, nickname: friend.nickname }));
-    const formattedShamePostUsers = shamePostUsers.map(friend => ({ id: friend._id, nickname: friend.nickname }));
+    const formattedPokeList = pokeList.map(friend => ({ 
+      id: friend._id, 
+      nickname: friend.nickname,
+      expoPushToken: friend.expoPushToken,
+    }));
+    const formattedShamePostUsers = shamePostUsers.map(friend => ({ 
+      id: friend._id, 
+      nickname: friend.nickname, 
+      expoPushToken: friend.expoPushToken,
+    }));
 
     res.status(200).json({
       pokeList: formattedPokeList,
