@@ -154,7 +154,7 @@ router.get('/:userId/poke-list', async (req, res) => {
           friend.shamePostSettings.isEnabled &&
           friend.shamePostSettings.noGymStreakLimit < friend.noGymStreak
       )
-      .map(friend => ({ nickname: friend.nickname })); // nickname만 포함
+      .slice(0, 10); // 최대 10명만 표시
     
     // nickname만 포함하도록 최종 변환
     const formattedPokeList = pokeList.map(friend => ({ id: friend._id, nickname: friend.nickname }));
