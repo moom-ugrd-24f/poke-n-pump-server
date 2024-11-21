@@ -42,6 +42,29 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
   }
 });
 
+// 주간 랭킹 조회
+router.get('/weekly-ranking', async (req, res) => {
+  try {
+    // 모든 사용자 데이터를 가져와 xp 기준으로 정렬
+    const users = await User.find({}, 'nickname xp profilePicture') // 필요한 필드만 가져옴
+      .sort({ xp: -1 }) // xp 내림차순으로 정렬
+      .limit(10); // 상위 10명만 반환
+
+    // 랭킹 데이터 형식화
+    const ranking = users.map((user, index) => ({
+      rank: index + 1,
+      _id: user._id,
+      nickname: user.nickname,
+      xp: user.xp,
+      profilePicture: user.profilePicture, // 프로필 사진 경로 포함
+    }));
+
+    res.status(200).json({ weeklyRanking: ranking });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching weekly ranking', error });
+  }
+});
+
 // 사용자 조회
 router.get('/:id', async (req, res) => {
   try {
@@ -185,28 +208,7 @@ router.post('/:id/complete-workout', async (req, res) => {
   }
 });
 
-// 주간 랭킹 조회
-router.get('/weekly-ranking', async (req, res) => {
-  try {
-    // 모든 사용자 데이터를 가져와 xp 기준으로 정렬
-    const users = await User.find({}, 'nickname xp profilePicture') // 필요한 필드만 가져옴
-      .sort({ xp: -1 }) // xp 내림차순으로 정렬
-      .limit(10); // 상위 10명만 반환
 
-    // 랭킹 데이터 형식화
-    const ranking = users.map((user, index) => ({
-      rank: index + 1,
-      _id: user._id,
-      nickname: user.nickname,
-      xp: user.xp,
-      profilePicture: user.profilePicture, // 프로필 사진 경로 포함
-    }));
-
-    res.status(200).json({ weeklyRanking: ranking });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching weekly ranking', error });
-  }
-});
 
 
 module.exports = router;
