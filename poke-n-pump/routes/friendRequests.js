@@ -77,7 +77,7 @@ router.get('/:userId/received-requests', async (req, res) => {
 
   try {
     // 현재 사용자가 받은 모든 초대 요청 검색
-    const receivedRequests = await FriendRequest.find({ receiver: userId });
+    const receivedRequests = await FriendRequest.find({ receiverId: userId });
 
     if (!receivedRequests || receivedRequests.length === 0) {
       return res.status(404).json({ message: 'No friend requests found' });
