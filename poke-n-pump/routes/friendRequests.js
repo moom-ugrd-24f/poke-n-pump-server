@@ -71,6 +71,28 @@ router.post('/accept', async (req, res) => {
   }
 });
 
+// 친구 초대 요청 거절
+router.post('/reject', async (req, res) => {
+  try {
+    const { requestId } = req.body;
+
+    // 요청 ID로 친구 요청 찾기
+    const friendRequest = await FriendRequest.findById(requestId);
+    if (!friendRequest || friendRequest.status !== 'pending') {
+      return res.status(404).json({ message: 'Friend request not found or already handled' });
+    }
+
+    // 상태를 "rejected"로 변경
+    friendRequest.status = 'rejected';
+    await friendRequest.save();
+
+    res.status(200).json({ message: 'Friend request rejected', friendRequest });
+  } catch (error) {
+    res.status(500).json({ message: 'Error rejecting friend request', error });
+  }
+});
+
+
 // 특정 사용자가 받은 모든 상태의 초대 요청 반환
 router.get('/:userId/received-requests', async (req, res) => {
   const { userId } = req.params;
