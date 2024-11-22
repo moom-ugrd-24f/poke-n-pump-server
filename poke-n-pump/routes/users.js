@@ -38,7 +38,7 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
         ? JSON.parse(shamePostSettings)
         : { isEnabled: false, noGymStreakLimit: 5 },
       profilePicture: req.file ? req.file.path : 'uploads/default-profile.jpg', // 기본 프로필 사진
-      visibility: visibility || 'friend', // 기본값 friend
+      visibility,
       todayAttendance: false, // 초기 값
       noGymStreak: 0, // 초기 값
     });

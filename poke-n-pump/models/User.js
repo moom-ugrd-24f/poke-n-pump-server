@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema({
       default: 5,
     },
   },
+  visibility: {
+    type: String,
+    required: true,
+    enum: ['global', 'friend'], // 'global' 또는 'friend'만 허용
+    default: 'friend',
+  },
   workoutPlan: {
     daysOfWeek: {
       type: [Number], 
