@@ -4,6 +4,8 @@ const multer = require('multer');
 const User = require('../models/User');
 const generateInviteCode = require('../utils/generateInviteCode');
 const router = express.Router();
+const Poke = require('../models/Poke');
+
 
 // Configure Multer for file upload
 const storage = multer.diskStorage({
@@ -21,27 +23,35 @@ const upload = multer({ storage: storage });
 // 사용자 생성
 router.post('/', upload.single('profilePicture'), async (req, res) => {
   try {
-    const { nickname, workoutPlan, shamePostSettings, expoPushToken } = req.body;
+    const { nickname, workoutPlan, shamePostSettings, visibility, expoPushToken } = req.body;
 
     // 고유한 inviteCode 생성
     const inviteCode = await generateInviteCode();
 
+    // 새 사용자 데이터 생성
     const newUser = new User({
       nickname,
       inviteCode,
       expoPushToken,
-      workoutPlan: JSON.parse(workoutPlan),
-      shamePostSettings: JSON.parse(shamePostSettings),
-      profilePicture: req.file ? req.file.path : 'uploads/default-profile.jpg' // Set default if no file
+      workoutPlan: workoutPlan ? JSON.parse(workoutPlan) : { daysOfWeek: [] },
+      shamePostSettings: shamePostSettings
+        ? JSON.parse(shamePostSettings)
+        : { isEnabled: false, noGymStreakLimit: 5 },
+      profilePicture: req.file ? req.file.path : 'uploads/default-profile.jpg', // 기본 프로필 사진
+      visibility: visibility || 'friend', // 기본값 friend
+      todayAttendance: false, // 초기 값
+      noGymStreak: 0, // 초기 값
     });
 
     await newUser.save();
 
     res.status(201).json(newUser);
   } catch (error) {
+    console.error('Error creating user:', error);
     res.status(500).json({ message: 'Error creating user', error });
   }
 });
+
 
 // 주간 랭킹 조회
 router.get('/weekly-ranking', async (req, res) => {
@@ -77,16 +87,50 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// 닉네임으로 사용자 존재 여부 확인
+router.get('/exists/:nickname', async (req, res) => {
+  try {
+    const { nickname } = req.params;
+
+    // 사용자 검색
+    const user = await User.findOne({ nickname });
+
+    if (user) {
+      return res.status(200).json({ exists: true, userId: user._id });
+    } else {
+      return res.status(404).json({ exists: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    res.status(500).json({ message: 'Error checking user existence', error });
+  }
+});
+
+
 // 사용자 업데이트
 router.put('/:id', async (req, res) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { nickname, workoutPlan, shamePostSettings, visibility, profilePicture } = req.body;
+
+    // 업데이트 데이터 생성
+    const updateData = {};
+    if (nickname) updateData.nickname = nickname;
+    if (workoutPlan) updateData.workoutPlan = JSON.parse(workoutPlan);
+    if (shamePostSettings) updateData.shamePostSettings = JSON.parse(shamePostSettings);
+    if (visibility) updateData.visibility = visibility;
+    if (profilePicture) updateData.profilePicture = profilePicture;
+
+    // 사용자 업데이트
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+
     res.json(updatedUser);
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ message: 'Error updating user', error });
   }
 });
+
 
 // 사용자 삭제
 router.delete('/:id', async (req, res) => {
