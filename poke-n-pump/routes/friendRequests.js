@@ -93,39 +93,36 @@ router.post('/reject', async (req, res) => {
 });
 
 
-// 특정 사용자가 받은 모든 상태의 초대 요청 반환
+// 특정 사용자가 받은 모든 상태의 초대 요청 반환 (sender의 nickname 포함)
 router.get('/:userId/received-requests', async (req, res) => {
   const { userId } = req.params;
 
   try {
     // 현재 사용자가 받은 모든 초대 요청 검색
-    const receivedRequests = await FriendRequest.find({ receiverId: userId });
+    const receivedRequests = await FriendRequest.find({ receiverId: userId }).populate('senderId', 'nickname');
 
     if (!receivedRequests || receivedRequests.length === 0) {
       return res.status(404).json({ message: 'No friend requests found' });
     }
 
-    // 상태별로 분류
-    const categorizedRequests = {
-      pending: [],
-      accepted: [],
-      rejected: []
-    };
-
-    receivedRequests.forEach(request => {
-      if (categorizedRequests[request.status]) {
-        categorizedRequests[request.status].push(request);
-      } else {
-        console.warn(`Unknown status "${request.status}" detected in request: ${request._id}`);
-      }
-    });
+    // 요청 데이터와 함께 sender의 nickname 포함
+    const requestsWithSenderNickname = receivedRequests.map(request => ({
+      id: request._id,
+      senderId: request.senderId._id, // sender의 ID
+      senderNickname: request.senderId.nickname, // sender의 nickname
+      receiverId: request.receiverId,
+      status: request.status,
+      createdAt: request.createdAt,
+      updatedAt: request.updatedAt,
+    }));
 
     // 응답 반환
-    res.status(200).json(categorizedRequests);
+    res.status(200).json(requestsWithSenderNickname);
   } catch (error) {
     console.error('Error fetching friend requests:', error);
     res.status(500).json({ message: 'Failed to fetch friend requests', error });
   }
 });
+
   
   module.exports = router;
