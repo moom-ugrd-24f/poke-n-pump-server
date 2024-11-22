@@ -156,50 +156,68 @@ router.get('/:userId/poke-list', async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // 사용자 조회 및 친구 목록 가져오기
+    // 1. 사용자 조회 및 친구 목록 가져오기
     const user = await User.findById(userId).populate('friends');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // 오늘이 운동하는 날이고, 아직 gym에 가지 않은 친구들 찾기
-    const pokeList = user.friends
-      .filter(friend => {
-        // 조건: workoutPlan에 오늘이 포함되어 있고, todayAttendance가 false인 경우
-        const today = new Date().getDay();
-        return (
-          friend.workoutPlan.daysOfWeek.includes(today) &&
-          !friend.todayAttendance
-        );
-      })
-      .slice(0, 10) // 최대 10명만 표시
+    const today = new Date().getDay();
 
-    // shamePostSettings 조건을 만족하는 사용자들만 별도로 표시
-    const shamePostUsers = pokeList
-      .filter(friend =>
-          friend.shamePostSettings.isEnabled &&
-          friend.shamePostSettings.noGymStreakLimit < friend.noGymStreak
-      )
-      .slice(0, 10); // 최대 10명만 표시
-    
-    // nickname만 포함하도록 최종 변환
-    const formattedPokeList = pokeList.map(friend => ({ 
-      id: friend._id, 
-      nickname: friend.nickname,
-      expoPushToken: friend.expoPushToken,
-    }));
-    const formattedShamePostUsers = shamePostUsers.map(friend => ({ 
-      id: friend._id, 
-      nickname: friend.nickname, 
-      expoPushToken: friend.expoPushToken,
-    }));
+    // 2. 전체 유저 중 visibility가 global인 사용자 가져오기
+    const globalUsers = await User.find({ visibility: 'global' })
+      .select('_id nickname expoPushToken workoutPlan todayAttendance shamePostSettings noGymStreak')
+      .lean();
 
-    res.status(200).json({
-      pokeList: formattedPokeList,
-      shamePostUsers: formattedShamePostUsers, // 추가로 표시할 사용자 목록
+    // 친구와 global 사용자 통합
+    const allPotentialUsers = [...user.friends, ...globalUsers];
+
+    // 친구 ID 목록을 배열로 생성
+    const friendIds = user.friends.map(friend => friend._id.toString());
+
+    // 3. poke 조건 만족하는 사용자 찾기
+    const pokeCandidates = allPotentialUsers.filter(candidate => {
+      return (
+        candidate.workoutPlan.daysOfWeek.includes(today) &&
+        !candidate.todayAttendance
+      );
     });
+
+    // 4. shamePost 조건 만족하는 사용자 찾기
+    const shamePostCandidates = allPotentialUsers.filter(candidate => {
+      return (
+        candidate.shamePostSettings.isEnabled &&
+        candidate.noGymStreak > user.noGymStreak
+      );
+    });
+
+    // 5. 오늘 사용자가 poke를 보낸 사용자 제외
+    const sentPokes = await Poke.find({
+      senderId: userId,
+      timestamp: {
+        $gte: new Date().setHours(0, 0, 0, 0), // 오늘 0시부터
+        $lte: new Date().setHours(23, 59, 59, 999), // 오늘 23시 59분까지
+      },
+    }).select('receiverId');
+
+    const sentPokeIds = sentPokes.map(poke => poke.receiverId.toString());
+
+    const filteredCandidates = pokeCandidates.filter(candidate => !sentPokeIds.includes(candidate._id.toString()));
+
+    // 6. 최종 결과 반환 (isShamePostCandidate 및 isFriend 속성 추가)
+    const finalCandidates = filteredCandidates.map(candidate => ({
+      id: candidate._id,
+      nickname: candidate.nickname,
+      expoPushToken: candidate.expoPushToken,
+      isShamePostCandidate: shamePostCandidates.some(shameCandidate => shameCandidate._id.toString() === candidate._id.toString()),
+      isFriend: friendIds.includes(candidate._id.toString()), // 친구 여부
+    }));
+
+    res.status(200).json(finalCandidates);
   } catch (error) {
+    console.error('Error fetching poke list:', error);
     res.status(500).json({ message: 'Error fetching poke list', error });
   }
 });
+
 
 // 운동 실행
 router.post('/:id/complete-workout', async (req, res) => {
