@@ -67,8 +67,8 @@ router.post('/random', async (req, res) => {
       user: newUser,
     });
   } catch (error) {
-    console.error('랜덤 유저 생성 오류:', error);
-    res.status(500).json({ message: '랜덤 유저 생성에 실패했습니다.', error });
+    console.error('랜덤 유저 생성 오류:', JSON.stringify(error, null, 2));
+    res.status(500).json({ message: '랜덤 유저 생성에 실패했습니다.', error: error.message || error });
   }
 });
 
