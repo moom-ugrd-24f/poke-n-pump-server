@@ -5,7 +5,7 @@ const User = require('../models/User');
 const generateInviteCode = require('../utils/generateInviteCode');
 const router = express.Router();
 const Poke = require('../models/Poke');
-
+const generateRandomUserData = require('../utils/randomUserData');
 
 // Configure Multer for file upload
 const storage = multer.diskStorage({
@@ -49,6 +49,26 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ message: 'Error creating user', error });
+  }
+});
+
+// 랜덤 유저 생성
+router.post('/random', async (req, res) => {
+  try {
+    const randomUserData = generateRandomUserData();
+
+    // 새로운 User 인스턴스 생성
+    const newUser = new User(randomUserData);
+
+    await newUser.save();
+
+    res.status(201).json({
+      message: '랜덤 유저가 성공적으로 생성되었습니다!',
+      user: newUser,
+    });
+  } catch (error) {
+    console.error('랜덤 유저 생성 오류:', error);
+    res.status(500).json({ message: '랜덤 유저 생성에 실패했습니다.', error });
   }
 });
 
