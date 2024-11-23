@@ -25,7 +25,7 @@ Create a `.env` file in the project root and add your MongoDB URI and other nece
 
 ```plaintext
 MONGODB_URI=mongodb+srv://<db_username>:<db_password>@pokepump.xddsr.mongodb.net/?retryWrites=true&w=majority&appName=PokePump
-PORT=3000
+PORT=2999
 TZ=Asia/Seoul
 ```
 
