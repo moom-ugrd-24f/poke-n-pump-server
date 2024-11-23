@@ -42,7 +42,21 @@ app.get('/', (req, res) => {
   res.send('Hello, Local Server is running!');
 });
 
-// 서버 시작
+const os = require('os');
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  const networkInterfaces = os.networkInterfaces();
+  const addresses = [];
+
+  for (const iface of Object.values(networkInterfaces)) {
+    iface.forEach((details) => {
+      if (details.family === 'IPv4' && !details.internal) {
+        addresses.push(details.address);
+      }
+    });
+  }
+
+  console.log(`Server is running on:`);
+  addresses.forEach((addr) => console.log(`  - http://${addr}:${PORT}`));
 });
+
