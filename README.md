@@ -42,7 +42,7 @@ https://escargots.postman.co/workspace/Escargots~704f90c2-b671-4b1e-aa51-94ce333
 
 ## Database Structure
 
-# User Schema
+### User Schema
 - `nickname` (String): Unique username, required.
 - `inviteCode` (String): Unique invite code for adding friends, required.
 - `xp` (Number): Cumulative experience points, defaults to `0`.
@@ -61,7 +61,7 @@ https://escargots.postman.co/workspace/Escargots~704f90c2-b671-4b1e-aa51-94ce333
 
 ---
 
-# FriendRequest Schema
+### FriendRequest Schema
 - `senderId` (ObjectId): Reference to the `User` sending the request, required.
 - `receiverId` (ObjectId): Reference to the `User` receiving the request, required.
 - `status` (String): Request status, either `pending`, `accepted`, or `rejected`, defaults to `pending`.
@@ -69,7 +69,7 @@ https://escargots.postman.co/workspace/Escargots~704f90c2-b671-4b1e-aa51-94ce333
 
 ---
 
-# Poke Schema
+### Poke Schema
 - `senderId` (ObjectId): Reference to the `User` sending the poke, required.
 - `receiverId` (ObjectId): Reference to the `User` receiving the poke, required.
 - `pokeType` (String): Predefined poke type (`Just Poke`, `Join Me`, `Trash Talk`, `Shame Post`), required.
