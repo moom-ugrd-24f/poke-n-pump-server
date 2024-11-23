@@ -249,7 +249,7 @@ router.get('/:userId/poke-list', async (req, res) => {
     const shamePostCandidates = allPotentialUsers.filter(candidate => {
       return (
         candidate.shamePostSettings.isEnabled &&
-        candidate.noGymStreak > user.noGymStreak
+        candidate.noGymStreak > candidate.shamePostSettings.noGymStreakLimit
       );
     });
 
