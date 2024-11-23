@@ -43,9 +43,14 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
       noGymStreak: 0, // 초기 값
     });
 
-    await newUser.save();
+    // 유저 저장
+    const savedUser = await newUser.save();
 
-    res.status(201).json(newUser);
+    // 자기 자신을 friends에 추가
+    savedUser.friends.push(savedUser._id);
+    await savedUser.save();
+
+    res.status(201).json(savedUser);
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ message: 'Error creating user', error });
@@ -60,11 +65,16 @@ router.post('/random', async (req, res) => {
     // 새로운 User 인스턴스 생성
     const newUser = new User(randomUserData);
 
-    await newUser.save();
+     // 유저 저장
+     const savedUser = await newUser.save();
+
+     // 자기 자신을 friends에 추가
+     savedUser.friends.push(savedUser._id);
+     await savedUser.save();
 
     res.status(201).json({
       message: '랜덤 유저가 성공적으로 생성되었습니다!',
-      user: newUser,
+      user: savedUser,
     });
   } catch (error) {
     console.error('랜덤 유저 생성 오류:', JSON.stringify(error, null, 2));
