@@ -225,7 +225,6 @@ router.post('/:userId/remove-friend', async (req, res) => {
   }
 });
 
-// poke 가능한 사용자 목록 가져오기
 router.get('/:userId/poke-list', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -236,16 +235,19 @@ router.get('/:userId/poke-list', async (req, res) => {
 
     const today = new Date().getDay();
 
+    // 친구 데이터를 lean 형태로 변환
+    const friends = user.friends.map(friend => friend.toObject());
+
     // 2. 전체 유저 중 visibility가 global인 사용자 가져오기
     const globalUsers = await User.find({ visibility: 'global' })
       .select('_id nickname expoPushToken workoutPlan todayAttendance shamePostSettings noGymStreak')
       .lean();
 
     // 친구와 global 사용자 통합
-    const allPotentialUsers = [...user.friends, ...globalUsers];
+    const allPotentialUsers = [...friends, ...globalUsers];
 
     // 친구 ID 목록을 배열로 생성
-    const friendIds = user.friends.map(friend => friend._id.toString());
+    const friendIds = friends.map(friend => friend._id.toString());
 
     // 3. poke 조건 만족하는 사용자 찾기
     const pokeCandidates = allPotentialUsers.filter(candidate => {
@@ -291,6 +293,7 @@ router.get('/:userId/poke-list', async (req, res) => {
     res.status(500).json({ message: 'Error fetching poke list', error });
   }
 });
+
 
 
 // 운동 실행
