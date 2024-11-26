@@ -140,15 +140,16 @@ router.get('/exists/:nickname', async (req, res) => {
 // 사용자 업데이트
 router.put('/:id', async (req, res) => {
   try {
-    const { nickname, workoutPlan, shamePostSettings, visibility, profilePicture } = req.body;
+    const { nickname, workoutPlan, shamePostSettings, visibility, profilePicture, xp } = req.body;
 
     // 업데이트 데이터 생성
     const updateData = {};
     if (nickname) updateData.nickname = nickname;
-    if (workoutPlan) updateData.workoutPlan = JSON.parse(workoutPlan);
-    if (shamePostSettings) updateData.shamePostSettings = JSON.parse(shamePostSettings);
+    if (workoutPlan) updateData.workoutPlan = workoutPlan;
+    if (shamePostSettings) updateData.shamePostSettings = shamePostSettings;
     if (visibility) updateData.visibility = visibility;
     if (profilePicture) updateData.profilePicture = profilePicture;
+    if (xp) updateData.xp = xp;
 
     // 사용자 업데이트
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
