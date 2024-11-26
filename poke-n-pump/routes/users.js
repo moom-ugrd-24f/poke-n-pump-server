@@ -84,12 +84,20 @@ router.post('/random', async (req, res) => {
 
 
 // 주간 랭킹 조회
-router.get('/weekly-ranking', async (req, res) => {
+router.get('/weekly-ranking/:userId', async (req, res) => {
   try {
+    const { userId } = req.params;
+
     // 모든 사용자 데이터를 가져와 xp 기준으로 정렬
     const users = await User.find({}, 'nickname xp profilePicture') // 필요한 필드만 가져옴
       .sort({ xp: -1 }) // xp 내림차순으로 정렬
       .limit(10); // 상위 10명만 반환
+
+    // 요청한 사용자의 정보 가져오기
+    const currentUser = await User.findById(userId, 'nickname xp profilePicture');
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     // 랭킹 데이터 형식화
     const ranking = users.map((user, index) => ({
@@ -100,11 +108,25 @@ router.get('/weekly-ranking', async (req, res) => {
       profilePicture: user.profilePicture, // 프로필 사진 경로 포함
     }));
 
-    res.status(200).json({ weeklyRanking: ranking });
+    // 요청한 사용자의 현재 랭킹 확인
+    const allUsers = await User.find({}, 'xp').sort({ xp: -1 }); // 모든 유저 xp로 정렬
+    const userRank = allUsers.findIndex(user => user._id.toString() === userId) + 1;
+
+    const userInfo = {
+      rank: userRank,
+      _id: currentUser._id,
+      nickname: currentUser.nickname,
+      xp: currentUser.xp,
+      profilePicture: currentUser.profilePicture,
+    };
+
+    res.status(200).json({ weeklyRanking: ranking, currentUser: userInfo });
   } catch (error) {
+    console.error('Error fetching weekly ranking:', error);
     res.status(500).json({ message: 'Error fetching weekly ranking', error });
   }
 });
+
 
 // 사용자 조회
 router.get('/:id', async (req, res) => {
