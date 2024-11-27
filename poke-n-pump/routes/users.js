@@ -251,6 +251,7 @@ router.post('/:userId/remove-friend', async (req, res) => {
 router.get('/:userId/poke-list', async (req, res) => {
   try {
     const { userId } = req.params;
+    const BASE_URL = `${req.protocol}://${req.get('host')}`;
 
     // 1. 사용자 조회 및 친구 목록 가져오기
     const user = await User.findById(userId).populate('friends');
@@ -305,6 +306,7 @@ router.get('/:userId/poke-list', async (req, res) => {
     const finalCandidates = filteredCandidates.map(candidate => ({
       id: candidate._id,
       nickname: candidate.nickname,
+      profilePicture: `${BASE_URL}/${candidate.profilePicture}`,
       expoPushToken: candidate.expoPushToken,
       isShamePostCandidate: shamePostCandidates.some(shameCandidate => shameCandidate._id.toString() === candidate._id.toString()),
       isFriend: friendIds.includes(candidate._id.toString()), // 친구 여부
