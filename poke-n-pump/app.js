@@ -36,6 +36,7 @@ scheduleNoGymStreakUpdate(); // 자정 업데이트 스케줄링 시작
 app.use('/api/users', userRoutes);                 // 사용자 관련 API
 app.use('/api/pokes', pokeRoutes);                 // poke 관련 API
 app.use('/api/friend-requests', friendRequestRoutes); // 친구 요청 관련 API
+app.use('/uploads', express.static('uploads'));
 
 // 기본 라우트
 app.get('/', (req, res) => {
