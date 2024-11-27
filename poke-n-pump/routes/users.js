@@ -263,9 +263,7 @@ router.get('/:userId/poke-list', async (req, res) => {
     const friends = user.friends.map(friend => friend.toObject());
 
     // 2. 전체 유저 중 visibility가 global인 사용자 가져오기
-    const globalUsers = await User.find({ visibility: 'global' })
-      .select('_id nickname expoPushToken workoutPlan todayAttendance shamePostSettings noGymStreak')
-      .lean();
+    const globalUsers = await User.find({ visibility: 'global' }).lean();
 
     // 친구와 global 사용자 통합
     const allPotentialUsers = [...friends, ...globalUsers];
@@ -301,9 +299,24 @@ router.get('/:userId/poke-list', async (req, res) => {
     const sentPokeIds = sentPokes.map(poke => poke.receiverId.toString());
 
     const filteredCandidates = pokeCandidates.filter(candidate => !sentPokeIds.includes(candidate._id.toString()));
+    const sortedCandidates = filteredCandidates;
+    // // 6. 친구와 비친구로 분리
+    // const friendCandidates = filteredCandidates.filter(candidate => friendIds.includes(candidate._id.toString()));
+    // const globalCandidates = filteredCandidates.filter(candidate => !friendIds.includes(candidate._id.toString()));
 
+    // // 7. 친구를 최대 10명까지 추출
+    // const getRandomSubset = (array, count) => {
+    //   const shuffled = array.sort(() => 0.5 - Math.random());
+    //   return shuffled.slice(0, count);
+    // };
+
+    // const selectedFriends = getRandomSubset(friendCandidates, 10);
+
+    // // 8. 친구가 10명 미만인 경우 global 사용자로 채우기
+    // const additionalGlobalUsers = getRandomSubset(globalCandidates, 10 - selectedFriends.length);
+    // const sortedCandidates = [...selectedFriends, ...additionalGlobalUsers];
     // 6. 최종 결과 반환 (isShamePostCandidate 및 isFriend 속성 추가)
-    const finalCandidates = filteredCandidates.map(candidate => ({
+    const finalCandidates = sortedCandidates.map(candidate => ({
       id: candidate._id,
       nickname: candidate.nickname,
       profilePicture: `${BASE_URL}/${candidate.profilePicture}`,
