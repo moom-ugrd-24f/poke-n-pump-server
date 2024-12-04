@@ -299,7 +299,11 @@ router.get('/:userId/poke-list', async (req, res) => {
     const sentPokeIds = sentPokes.map(poke => poke.receiverId.toString());
 
     const filteredCandidates = pokeCandidates.filter(candidate => !sentPokeIds.includes(candidate._id.toString()));
-    const sortedCandidates = filteredCandidates;
+    
+    // 최종 후보군 중복 제거
+    const sortedCandidates = filteredCandidates.filter(
+      (user, index, self) => self.findIndex(u => u._id.toString() === user._id.toString()) === index
+    );
     // // 6. 친구와 비친구로 분리
     // const friendCandidates = filteredCandidates.filter(candidate => friendIds.includes(candidate._id.toString()));
     // const globalCandidates = filteredCandidates.filter(candidate => !friendIds.includes(candidate._id.toString()));
