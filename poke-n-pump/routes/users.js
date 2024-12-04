@@ -147,11 +147,7 @@ router.get('/exists/:nickname', async (req, res) => {
     // 사용자 검색
     const user = await User.findOne({ nickname });
 
-    if (user) {
-      return res.status(200).json({ exists: true, userId: user._id });
-    } else {
-      return res.status(404).json({ exists: false, message: 'User not found' });
-    }
+    return res.status(200).json({ exists: !!user, userId: user?._id });
   } catch (error) {
     console.error('Error checking user existence:', error);
     res.status(500).json({ message: 'Error checking user existence', error });
