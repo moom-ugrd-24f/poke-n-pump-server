@@ -2,3 +2,4 @@ node_modules/
 # Ignore all .zip files
 *.zip
 .env
+uploads/
