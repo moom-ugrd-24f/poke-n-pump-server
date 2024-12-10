@@ -337,20 +337,25 @@ router.get('/:userId/poke-list', async (req, res) => {
 // 운동 실행
 router.post('/:id/complete-workout', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { noGymStreak: 0, todayAttendance: true },
-      { new: true }
-    );
-
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ message: 'Workout completed', user });
+
+    const today = new Date().getDay();
+    let update = { noGymStreak: 0, todayAttendance: true };
+
+    // Check if today is part of the user's workout plan and update gymStreak if it is
+    if (user.workoutPlan.daysOfWeek.includes(today)) {
+      update.gymStreak = user.gymStreak + 1;
+    }
+
+    // Update the user with either incremented gymStreak or just resetting noGymStreak and marking attendance
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, update, { new: true });
+
+    res.json({ message: 'Workout completed', user: updatedUser });
   } catch (error) {
     res.status(500).json({ message: 'Error completing workout', error });
   }
 });
-
-
 
 
 module.exports = router;

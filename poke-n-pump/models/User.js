@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
   },
   todayAttendance: {
     type: Boolean,
-    default: false,
+    default: false, 
   },
   noGymStreak: {
     type: Number,
@@ -62,6 +62,18 @@ const userSchema = new mongoose.Schema({
     required: true,
     type: String, 
   },
+  gymStreak: {
+    type: Number,
+    default: 0,
+  },
+  pokeCount: {
+    type: Number,
+    default: 0,
+  },
+  shamePostCount: {
+    type: Number,
+    default: 0,
+  }
 }, {
   timestamps: true,
 });

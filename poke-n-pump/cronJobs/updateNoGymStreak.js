@@ -21,4 +21,15 @@ const scheduleNoGymStreakUpdate = () => {
   });
 };
 
+const resetGymStreakIfNeeded = async () => {
+  const users = await User.find({});
+  users.forEach(async (user) => {
+    const today = new Date().getDay();
+    if (user.workoutPlan.daysOfWeek.includes(today) && !user.todayAttendance) {
+      await User.findByIdAndUpdate(user._id, { gymStreak: 0 });
+    }
+  });
+};
+
+
 module.exports = scheduleNoGymStreakUpdate;

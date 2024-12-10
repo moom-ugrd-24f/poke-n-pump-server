@@ -2,6 +2,7 @@
 const express = require('express');
 const Poke = require('../models/Poke');
 const router = express.Router();
+const User = require('../models/User');
 
 // poke 생성
 router.post('/', async (req, res) => {
@@ -9,6 +10,10 @@ router.post('/', async (req, res) => {
     const { senderId, receiverId, pokeType } = req.body;
     const newPoke = new Poke({ senderId, receiverId, pokeType });
     await newPoke.save();
+    await User.findByIdAndUpdate(senderId, { $inc: { pokeCount: 1 } });
+    if (pokeType === 'Shame Post') {
+      await User.findByIdAndUpdate(senderId, { $inc: { shamePostCount: 1 } });
+    }
     res.status(201).json(newPoke);
   } catch (error) {
     res.status(500).json({ message: 'Error sending poke', error });
